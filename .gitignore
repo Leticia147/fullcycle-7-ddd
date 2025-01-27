@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+
+# TypeScript compiled output
+dist/
+build/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# MacOS files
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
