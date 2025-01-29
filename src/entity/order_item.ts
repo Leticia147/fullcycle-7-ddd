@@ -11,6 +11,8 @@ export default class OrderItem {
         this._price = price;
         this._productId = productId;
         this._quantity = quantity;
+
+        // validar quantidade > 0 que aqui
     }
 
     get quantity(): number {
