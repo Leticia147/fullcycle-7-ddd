@@ -2,7 +2,6 @@ import Customer from "../entity/customer";
 import Order from "../entity/order";
 import OrderItem from "../entity/order_item";
 import OrderService from "./order.service";
-import { v4 as uuid } from "uuid";
 
 describe("Order service unit tests", () => {
     it("should place new order", () => {
