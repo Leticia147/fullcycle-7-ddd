@@ -9,7 +9,9 @@ export default class Product {
         this._price = price;
         this.validate();
     }
-
+    get id(): string {
+        return this._id;
+    }
     validate(): boolean {
         if (!this._id) {
             throw new Error('Id is required');
