@@ -13,7 +13,7 @@ export default class Address{
 
         this.validate();
     }
-
+    
     get street(){
         return this._street;
     }

@@ -27,12 +27,13 @@ describe("customer repository teste", () => {
     it("Deve criar um cliente", async () => {
         const customerRepository = new CustomerRepository();
         const customer = new Customer("123", "Customer 1");
-        const address = new Address("Street 1", 1,"Zipcode 1", "City 1");
-        customer.Address = address;
+        const address = new Address("Street 1", 1, "City 1", "Zipcode 1");
+
+        customer.changeAddress(address);
         await customerRepository.create(customer);
 
         const customerModel = await CustomerModel.findOne({ where: { id: 123 } });
-        
+
         expect(customerModel.toJSON()).toStrictEqual(
             {
                 id: "123",
@@ -49,7 +50,7 @@ describe("customer repository teste", () => {
     it("Deve atualizar um customer", async () => {
         const customerRepository = new CustomerRepository();
         const customer = new Customer("123", "Customer 1");
-        const address = new Address("Street 1", 1,"Zipcode 1", "City 1");
+        const address = new Address("Street 1", 1,"City 1", "Zipcode 1");
         customer.Address = address;
         await customerRepository.create(customer);
 
