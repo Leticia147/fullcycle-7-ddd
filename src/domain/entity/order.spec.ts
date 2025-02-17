@@ -1,7 +1,7 @@
 import Address from "./address";
 import Customer from "./customer";
 import Order from "./order";
-import OrderItem from "./order_item";
+import OrderItem from "./orderItem";
 
 describe('Order unit tests', () => {
 

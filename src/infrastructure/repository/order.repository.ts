@@ -1,6 +1,6 @@
 import Order from "../../domain/entity/order";
-import OrderItemModel from "../db/sequelize/model/order-item.model";
 import OrderModel from "../db/sequelize/model/order.model";
+import OrderItemModel from "../db/sequelize/model/order-item.model";
 
 export default class OrderRepository {
     async create(entity: Order): Promise<void> {
@@ -8,7 +8,7 @@ export default class OrderRepository {
             id: entity.id,
             customerId: entity.customerId,
             total: entity.total(),
-            items: entity.items.map(item => ({
+            items: entity.items.map((item) => ({
                 id: item.id,
                 name: item.name,
                 price: item.price,
@@ -18,7 +18,8 @@ export default class OrderRepository {
         },
         {
           include: [{model: OrderItemModel}] ,
-        });
+        }
+        );
     }
    
 }
