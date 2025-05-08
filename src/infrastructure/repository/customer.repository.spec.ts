@@ -3,6 +3,12 @@ import CustomerModel from "../db/sequelize/model/customer.model";
 import Customer from "../../domain/entity/customer";
 import CustomerRepository from "./customer.repository";
 import Address from "../../domain/entity/address";
+import EventDispatcher from "../../domain/event/@shared/event-dispatcher";
+import EnviaConsoleLogHandler from "../../domain/event/@shared/customer/handler/envia-console-log-handler";
+import EnviaConsoleLog1Handler from "../../domain/event/@shared/customer/handler/envia-console-log1-handler";
+import EnviaConsoleLog2Handler from "../../domain/event/@shared/customer/handler/envia-console-log2-handler";
+import CustomerCreatedEvent from "../../domain/event/@shared/customer/customer-created.event";
+import CustomerChangedAddressEvent from "../../domain/event/@shared/customer/customer-changed-address.event";
 
 describe("customer repository teste", () => {
     let sequelize: Sequelize;
@@ -26,13 +32,36 @@ describe("customer repository teste", () => {
 
     it("Deve criar um cliente", async () => {
         const customerRepository = new CustomerRepository();
+        const eventDispatcher = new EventDispatcher();
+        const eventHandler = new EnviaConsoleLogHandler();
+        const eventHandler1 = new EnviaConsoleLog1Handler();
+        const eventHandler2 = new EnviaConsoleLog2Handler();
+        
+        const spyEventHandler = jest.spyOn(eventHandler, 'handle');
+        const spyEventHandler1 = jest.spyOn(eventHandler1, 'handle');
+        const spyEventHandler2= jest.spyOn(eventHandler2, 'handle');
+
+        eventDispatcher.register('CustomerChangedAddressEvent', eventHandler);
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler1);
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler2);
+        
         const customer = new Customer("123", "Customer 1");
+        const customerCreatedEvent = new CustomerCreatedEvent({customer});
+        eventDispatcher.notify(customerCreatedEvent);
         const address = new Address("Street 1", 1, "City 1", "Zipcode 1");
+        
+        expect(eventDispatcher.getEventHandlers["CustomerCreatedEvent"]).toBeDefined();
 
         customer.changeAddress(address);
         await customerRepository.create(customer);
-
         const customerModel = await CustomerModel.findOne({ where: { id: 123 } });
+        
+        const customerChangedAddressEvent = new CustomerChangedAddressEvent({
+            customer,
+            address: address,
+        });
+        eventDispatcher.notify(customerChangedAddressEvent);
+        expect(eventDispatcher.getEventHandlers["CustomerChangedAddressEvent"]).toBeDefined();
 
         expect(customerModel.toJSON()).toStrictEqual(
             {
@@ -44,12 +73,26 @@ describe("customer repository teste", () => {
                 number: address.number,
                 zipcode: address.zip,
                 city: address.city,
-            });
+        });
+
+        expect(spyEventHandler).toHaveBeenCalled();
+        expect(spyEventHandler1).toHaveBeenCalled();
+        expect(spyEventHandler2).toHaveBeenCalled();
     });
 
     it("Deve atualizar um customer", async () => {
         const customerRepository = new CustomerRepository();
+        const eventDispatcher = new EventDispatcher();
+        const eventHandler1 = new EnviaConsoleLog1Handler();
+        const eventHandler2 = new EnviaConsoleLog2Handler();
+        const spyEventHandler = jest.spyOn(eventHandler1, 'handle');
+        const spyEventHandler2 = jest.spyOn(eventHandler2, 'handle');
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler1);
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler2);
+        
         const customer = new Customer("123", "Customer 1");
+        const customerCreatedEvent = new CustomerCreatedEvent({customer});
+        eventDispatcher.notify(customerCreatedEvent);
         const address = new Address("Street 1", 1,"City 1", "Zipcode 1");
         customer.Address = address;
         await customerRepository.create(customer);
@@ -70,18 +113,33 @@ describe("customer repository teste", () => {
                 zipcode: address.zip,
                 city: address.city,
         });
+
+        expect(spyEventHandler).toHaveBeenCalled();
+        expect(spyEventHandler2).toHaveBeenCalled();
     });
 
     it("Deve buscar um customer", async () => {
         const customerRepository = new CustomerRepository();
+        const eventDispatcher = new EventDispatcher();
+        const eventHandler1 = new EnviaConsoleLog1Handler();
+        const eventHandler2 = new EnviaConsoleLog2Handler();
+        const spyEventHandler = jest.spyOn(eventHandler1, 'handle');
+        const spyEventHandler2 = jest.spyOn(eventHandler2, 'handle');
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler1);
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler2);
+
         const customer = new Customer("123", "Customer 1");
+        const customerCreatedEvent = new CustomerCreatedEvent({customer});
+        eventDispatcher.notify(customerCreatedEvent);
         const address = new Address("Street 1", 1,"Zipcode 1", "City 1");
         customer.Address = address;
         await customerRepository.create(customer);
         
         const customerResult = await customerRepository.find(customer.id);
-
         expect(customer).toStrictEqual(customerResult);
+
+        expect(spyEventHandler).toHaveBeenCalled();
+        expect(spyEventHandler2).toHaveBeenCalled();
     });
 
 
@@ -94,7 +152,18 @@ describe("customer repository teste", () => {
 
     it("Deve buscar todos os produtos", async () => {     
         const customerRepository = new CustomerRepository();
+        const eventDispatcher = new EventDispatcher();
+        const eventHandler1 = new EnviaConsoleLog1Handler();
+        const eventHandler2 = new EnviaConsoleLog2Handler();
+        const spyEventHandler = jest.spyOn(eventHandler1, 'handle');
+        const spyEventHandler2 = jest.spyOn(eventHandler2, 'handle');
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler1);
+        eventDispatcher.register('CustomerCreatedEvent', eventHandler2);
+
         const customer1 = new Customer("123", "Customer 1",);
+        const customerCreatedEvent = new CustomerCreatedEvent({customer1});
+        eventDispatcher.notify(customerCreatedEvent);
+
         const address1 = new Address("Street 1", 1,"Zipcode 1", "City 1");
         customer1.Address = address1;
         customer1.addRewardPoints(10);
@@ -102,6 +171,8 @@ describe("customer repository teste", () => {
 
         
         const customer2 = new Customer("2", "Customer 2");
+        const customerCreatedEvent2 = new CustomerCreatedEvent({customer2});
+        eventDispatcher.notify(customerCreatedEvent2);
         const address2 = new Address("Street 2", 2,"Zipcode 2", "City 2");
         customer2.Address = address2;
         customer2.addRewardPoints(20);
@@ -114,5 +185,7 @@ describe("customer repository teste", () => {
         expect(foundCustomers).toHaveLength(2);
         expect(foundCustomers).toContainEqual(customer1);
         expect(foundCustomers).toContainEqual(customer2);
+        expect(spyEventHandler).toHaveBeenCalled();
+        expect(spyEventHandler2).toHaveBeenCalled();
     });
 });

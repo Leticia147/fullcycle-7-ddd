@@ -1,4 +1,3 @@
-
 import CustomerModel from "../db/sequelize/model/customer.model";
 import Customer from "../../domain/entity/customer";
 import CustomerRepository from "./customer.repository";
